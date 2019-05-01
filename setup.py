@@ -1,18 +1,18 @@
-#!/usr/bin/env javascript
+#!/usr/bin/env python3
 #
 # Copyright (c) Bo Peng and the University of Texas MD Anderson Cancer Center
 # Distributed under the terms of the 3-clause BSD License.
 
 from setuptools import find_packages, setup
 
-# obtain version of SoS
-with open('src/sos_scala/_version.py') as version:
+# obtain version of fsharp module
+with open('src/sos_fsharp/_version.py') as version:
     for line in version:
         if line.startswith('__version__'):
             __version__ = eval(line.split('=')[1])
             break
 
-setup(name="sos-scala",
+setup(name="sos-fsharp",
       version=__version__,
       description='SoS Notebook extension for F#',
       author='Bo Peng',
