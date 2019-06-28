@@ -48,7 +48,7 @@ def _Fsharp_repr(obj, processed=None):
             return 'Seq.empty |> ResizeArray'
         # if the data is of homogeneous type, let us use typed ResizeArray
         # otherwise use untyped ResizeArray
-        # this can be confusion but list can be difficult to handle
+        # this can be confusing but list can be difficult to handle
         if homogeneous_type(obj):
             return '[' + ';'.join(_Fsharp_repr(x) for x in obj) + '] |> ResizeArray'
         else:
