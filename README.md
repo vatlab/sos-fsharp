@@ -12,15 +12,19 @@ python3.6 -m venv sosvenv
 source sosvenv/bin/activate
 pip install wheel
 pip install -e .
-pip install selenium
-pip install pytest
 
 ```
 
-Also install [Chrome](https://www.google.com/chrome/browser/) and [ChromeDriver](https://chromedriver.storage.googleapis.com/index.html?path=75.0.3770.90/) to run the tests.
-
-~~pip install jupyterlab
-pip install jupyter-console
-jupyter console --kernel simple_kernel~~
 
 If removal of pip editable installation is required, do `rm -r $(find . -name '*.egg-info')` from `sos-fsharp` when venv is enabled.
+
+
+## Tests
+
+Install [Chrome](https://www.google.com/chrome/browser/) and [ChromeDriver](https://chromedriver.storage.googleapis.com/index.html?path=75.0.3770.90/) to run the tests.
+
+```
+pip install selenium pytest requests nose
+pytest .
+```
+
