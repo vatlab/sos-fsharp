@@ -14,7 +14,7 @@ with open('src/sos_fsharp/_version.py') as version:
 
 setup(name="sos-fsharp",
       version=__version__,
-      description='SoS Notebook extension for F#',
+      description='SoS Notebook extension for ifsharp',
       author='Bo Peng',
       url='https://github.com/vatlab/sos-fsharp',
       author_email='bpeng@mdanderson.org',
@@ -43,6 +43,6 @@ setup(name="sos-fsharp",
       ],
       entry_points='''
 [sos_languages]
-F# = sos_fsharp.kernel:sos_fsharp
+ifsharp = sos_fsharp.kernel:sos_fsharp
 '''
       )

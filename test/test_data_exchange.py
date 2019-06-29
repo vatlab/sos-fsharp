@@ -22,7 +22,7 @@ class TestDataExchange(NotebookTest):
             f'''\
             %get {var_name}
             {var_name}''',
-            kernel='F#')
+            kernel='ifsharp')
     #{var_name} <- {r_expr}
     def put_to_SoS(self, notebook, r_expr):
         var_name = self._var_name()
@@ -31,7 +31,7 @@ class TestDataExchange(NotebookTest):
             %put {var_name}
             let {var_name} = {r_expr}
             ''',
-            kernel='F#')
+            kernel='ifsharp')
         return notebook.check_output(f'{var_name}', kernel='SoS')
     #return notebook.check_output(f'print(repr({var_name}))', kernel='SoS')
 
@@ -253,11 +253,11 @@ class TestDataExchange(NotebookTest):
     #         df = pd.DataFrame({'column_{0}'.format(i): arr for i in range(10)})
     #         ''',
     #         kernel='SoS')
-    #     assert '1000' == notebook.check_output('dim(df)[1]', kernel='F#')
-    #     assert '10' == notebook.check_output('dim(df)[2]', kernel='F#')
+    #     assert '1000' == notebook.check_output('dim(df)[1]', kernel='ifsharp')
+    #     assert '10' == notebook.check_output('dim(df)[2]', kernel='ifsharp')
 
     # def test_put_dataframe(self, notebook):
-    #     notebook.call('%put mtcars', kernel='F#')
+    #     notebook.call('%put mtcars', kernel='ifsharp')
     #     assert '32' == notebook.check_output('mtcars.shape[0]', kernel='SoS')
     #     assert '11' == notebook.check_output('mtcars.shape[1]', kernel='SoS')
     #     assert "'Mazda RX4'" == notebook.check_output(
