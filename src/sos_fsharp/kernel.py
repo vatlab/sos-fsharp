@@ -131,6 +131,89 @@ def _Fsharp_repr(obj, processed=None):
     else:
         return repr('Unsupported datatype {}'.format(short_repr(obj)))
 
+Fsharp_init_statements = r'''
+open System.Numerics
+open System.Collections.Generic
+
+let printObject x =
+    let t = x.GetType()
+    let properties = t.GetProperties()
+    printfn "-----------"
+    if t.FullName = x.ToString() then
+        printfn "%s" t.FullName
+    else
+        printfn "%s" t.FullName
+        printfn "Value: %O" x
+    properties 
+    |> Array.filter( fun prop -> prop.GetIndexParameters().Length = 0 )
+    |> Array.iter (fun prop ->
+        if prop.CanRead then
+            let value = prop.GetValue(x, null)
+            printfn "%s: %O" prop.Name value
+        else
+            printfn "%s: ?" prop.Name)
+
+let pyReprLogical obj =
+    if obj then
+        "True"
+    else
+        "False"
+
+let pyReprInteger obj =
+    obj.ToString()
+
+let pyReprDouble obj =
+    if obj = nan then
+      "numpy.nan"
+    else if obj = infinity then
+      """float("inf")"""
+    else
+        obj.ToString()
+
+let pyReprComplex obj =
+    let rl = obj.Real
+    let im = obj.Imaginary
+    "complex(" + rl.ToString() + "," + im.ToString() + ")" 
+
+let pyReprCharacter obj =
+    "r\"\"\"" +  obj + "\"\"\""
+
+let pyReprArray converter obj =
+    //1D without shape
+    let dataString = String.concat "," (obj |> Array.iter converter)
+    //shape
+    let dimensionString =  String.concat "," ( [| for i = 0 to obj.Rank - 1 do yield obj.GetLength(i).ToString() |] )
+    "numpy.array([" + dataString + "]).reshape((" + dimensionString + "))"
+
+let pyReprN obj =
+    "[" + ( obj |> Seq.map pyRepr |> String.concat "," ) + "]"
+
+let pyRepr obj =
+//https://stackoverflow.com/questions/7901111/f-check-if-a-value-is-an-array-of-strings-an-array-of-arrays-of-string-or-a-s
+    match obj with
+    | :? array<bool> as a ->
+        a |> pyReprArray pyReprLogical
+    | :? array<int> as a ->
+        a |> pyReprArray pyReprInteger
+    | :? array<int> as a ->
+        a |> pyReprArray pyReprDouble
+    | :? array<int> as a ->
+        a |> pyReprArray pyReprComplex
+    | :? array<string> as a ->
+        a |> pyReprArray pyReprCharacter
+
+    //handles nested dictionaries
+    | :? IDictionary<_,_> as d ->
+        "{" + ( d |> Seq.map(fun (KeyValue(k,v)) -> (k |> pyRepr) + ":" + (v|pyRepr) ) |> String.concat "," )  "}"
+    //handles nested lists
+    | :? IEnumerable<_> as s -> 
+        "[" + ( s |> Seq.map pyReprN |> String.concat "," ) +  "]"
+    | None -> "None"
+    | null -> "None"
+    | _ -> "'Untransferrable variable'"
+    }
+}
+'''
 
 class sos_fsharp:
     supported_kernels = {'F#': ['ifsharp']}
@@ -145,7 +228,7 @@ class sos_fsharp:
     def __init__(self, sos_kernel, kernel_name='ifsharp'):
         self.sos_kernel = sos_kernel
         self.kernel_name = kernel_name
-        self.init_statements = ''
+        self.init_statements = Fsharp_init_statements
 
     def get_vars(self, names):
         for name in names:
@@ -168,7 +251,7 @@ class sos_fsharp:
     def put_vars(self, items, to_kernel=None):
         # first let us get all variables with names starting with sos
         response = self.sos_kernel.get_response(
-            'cat(..py.repr(System.Reflection.Assembly.GetExecutingAssembly().GetTypes() |> Seq.collect( fun t -> t.GetProperties(System.Reflection.BindingFlags.Static ||| System.Reflection.BindingFlags.NonPublic ||| System.Reflection.BindingFlags.Public) |> Seq.map(fun p -> p.Name) ) |> Seq.toArray))', ('stream',), name=('stdout',))[0][1]
+            'System.Reflection.Assembly.GetExecutingAssembly().GetTypes() |> Seq.collect( fun t -> t.GetProperties(System.Reflection.BindingFlags.Static ||| System.Reflection.BindingFlags.NonPublic ||| System.Reflection.BindingFlags.Public) |> Seq.map(fun p -> p.Name) ) |> Seq.toArray', ('stream',), name=('stdout',))[0][1]
         all_vars = eval(response['text'])
         all_vars = [all_vars] if isinstance(all_vars, str) else all_vars
 
@@ -213,7 +296,7 @@ class sos_fsharp:
         # return '', f'Unknown variable {item}'
         try:
             return "", self.sos_kernel.get_response(
-                f'..sos.preview("{item}")', ('stream',),
+                f'printObject {item}', ('stream',),
                 name=('stdout',))[0][1]['text']
         except Exception as e:
             env.log_to_file('VARIABLE', f'Preview of {item} failed: {e}')
