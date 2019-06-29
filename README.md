@@ -23,6 +23,8 @@ If removal of pip editable installation is required, do `rm -r $(find . -name '*
 
 Install [Chrome](https://www.google.com/chrome/browser/) and [ChromeDriver](https://chromedriver.storage.googleapis.com/index.html?path=75.0.3770.90/) to run the tests.
 
+You must `source setenv.sh` before running the tests.
+
 ```
 pip install selenium pytest requests nose
 pytest .
