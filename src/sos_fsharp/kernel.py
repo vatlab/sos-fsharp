@@ -216,7 +216,7 @@ let pyRepr obj =
 '''
 
 class sos_fsharp:
-    supported_kernels = {'ifsharp': ['ifsharp']}
+    supported_kernels = {'F#': ['ifsharp']}
     background_color = '#5DBCD2'
     options = {
         'variable_pattern': r'^\s*let\s+([_A-Za-z\$@`\?][_A-Za-z0-9\$@`\?]+)\s*(=).*$',
@@ -246,7 +246,7 @@ class sos_fsharp:
                 f'let {newname} = {fsharp_repr}',
                 True,
                 False,
-                on_error=f'Failed to get variable {name} to ifsharp')
+                on_error=f'Failed to get variable {name} to F#')
 
     def put_vars(self, items, to_kernel=None):
         # first let us get all variables with names starting with sos

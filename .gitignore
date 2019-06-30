@@ -1,5 +1,0 @@
-sosvenv/
-.vscode/
-src/sos_fsharp.egg-info/
-test/__pycache__/
-*.log
