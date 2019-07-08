@@ -5,15 +5,20 @@ SoS extension for F# using [IfSharp kernel](https://github.com/fsprojects/IfShar
 
 ## Run: Example development workflow
 
+
 ```
 git clone https://github.com/vatlab/sos-fsharp.git
 cd sos-fsharp/
 python3.6 -m venv sosvenv
 source sosvenv/bin/activate
 pip install wheel
+pip install git+https://github.com/vatlab/sos-notebook.git
 pip install -e .
 
 ```
+
+You'll also need to install [ifsharp](https://github.com/fsprojects/IfSharp) for the F# kernel.
+
 
 
 If removal of pip editable installation is required, do `rm -r $(find . -name '*.egg-info')` from `sos-fsharp` when venv is enabled.
