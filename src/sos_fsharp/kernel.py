@@ -158,7 +158,7 @@ let pyReprLogical obj =
         "True"
     else
         "False"
-
+        
 let pyReprInteger obj =
     obj.ToString()
 
@@ -170,49 +170,51 @@ let pyReprDouble obj =
     else
         obj.ToString()
 
-let pyReprComplex obj =
+let pyReprComplex (obj : Complex) =
     let rl = obj.Real
     let im = obj.Imaginary
     "complex(" + rl.ToString() + "," + im.ToString() + ")" 
 
 let pyReprCharacter obj =
     "r\"\"\"" +  obj + "\"\"\""
-
+    
 let pyReprArray converter obj =
     //1D without shape
-    let dataString = String.concat "," (obj |> Array.iter converter)
+    let dataString = String.concat "," (obj |> Array.toSeq |> Seq.reduce Seq.append |> Seq.map converter) 
     //shape
     let dimensionString =  String.concat "," ( [| for i = 0 to obj.Rank - 1 do yield obj.GetLength(i).ToString() |] )
     "numpy.array([" + dataString + "]).reshape((" + dimensionString + "))"
+    
 
-let pyReprN obj =
-    "[" + ( obj |> Seq.map pyRepr |> String.concat "," ) + "]"
-
-let pyRepr obj =
+let rec pyRepr (obj:obj) =
 //https://stackoverflow.com/questions/7901111/f-check-if-a-value-is-an-array-of-strings-an-array-of-arrays-of-string-or-a-s
     match obj with
-    | :? array<bool> as a ->
+    | :? (seq<bool>[]) as a ->
         a |> pyReprArray pyReprLogical
-    | :? array<int> as a ->
+    | :? (seq<int>[]) as a ->
         a |> pyReprArray pyReprInteger
-    | :? array<int> as a ->
+    | :? (seq<float>[]) as a ->
         a |> pyReprArray pyReprDouble
-    | :? array<int> as a ->
+    | :? (seq<Complex>[]) as a ->
         a |> pyReprArray pyReprComplex
-    | :? array<string> as a ->
+    | :? (seq<string>[]) as a ->
         a |> pyReprArray pyReprCharacter
 
     //handles nested dictionaries
-    | :? IDictionary<_,_> as d ->
-        "{" + ( d |> Seq.map(fun (KeyValue(k,v)) -> (k |> pyRepr) + ":" + (v|pyRepr) ) |> String.concat "," )  "}"
+    | :? IDictionary<obj,obj> as d ->
+        "{" + ( d |> Seq.map(fun (KeyValue(k,v)) -> (k |> pyRepr) + ":" + (v |> pyRepr) )  |> String.concat "," )  + "}"
     //handles nested lists
-    | :? IEnumerable<_> as s -> 
+    | :? IEnumerable<IEnumerable<obj>> as s -> 
         "[" + ( s |> Seq.map pyReprN |> String.concat "," ) +  "]"
-    | None -> "None"
+    | :? Option<obj> as a ->
+        match a with 
+        | None -> "None"
+        | Some(x) -> pyRepr x
     | null -> "None"
     | _ -> "'Untransferrable variable'"
-    }
-}
+
+and pyReprN (obj:seq<obj>) =
+    "[" + ( obj |> Seq.map pyRepr |> String.concat "," ) + "]"
 '''
 
 class sos_fsharp:
