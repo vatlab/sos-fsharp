@@ -6,16 +6,13 @@
 import os
 import tempfile
 from sos_notebook.test_utils import NotebookTest
-
+import time
 
 class TestInterface(NotebookTest):
 
     def test_prompt_color(self, notebook):
         '''test color of input and output prompt'''
-        idx = notebook.call(
-            '''\
-            printfn "%s" "this is F#"
-            ''', kernel='F#')
+        idx = notebook.call('''printfn "%s" "this is F#"''', kernel='F#')
         assert [220, 220, 218] == notebook.get_input_backgroundColor(idx)
         assert [220, 220, 218] == notebook.get_output_backgroundColor(idx)
 
@@ -25,7 +22,7 @@ class TestInterface(NotebookTest):
         notebook.call('%cd ..', kernel="SoS")
         output2 = notebook.check_output('System.Environment.CurrentDirectory', kernel='F#')
         assert len(output1) > len(output2)
-        assert output1.strip("'").startswith(output2.strip("'"))
+        assert output1.strip('"').startswith(output2.strip('"'))
         #
         # cd to a specific directory
         tmpdir = os.path.join(tempfile.gettempdir(), 'somedir')
@@ -62,8 +59,8 @@ class TestInterface(NotebookTest):
         assert '123' == notebook.check_output('sosInSoS', kernel='F#')
         # assert '123' == notebook.check_output('sosInSoS', kernel='R')
 
-        notebook.call('sosInR <- 12345', kernel='F#')
-        assert '12345' == notebook.check_output('sosInR', kernel='SoS')
+        notebook.call('let sosInFsharp = 12345', kernel='F#')
+        assert '12345' == notebook.check_output('sosInFsharp', kernel='SoS')
 
     def test_preview(self, notebook):
         '''Test support for %preview'''
@@ -95,9 +92,14 @@ class TestInterface(NotebookTest):
 
     def test_sessioninfo(self, notebook):
         '''test support for %sessioninfo'''
-        notebook.call('printfn "%s" "this is F#)', kernel='F#')
+        notebook.call('printfn "%s" "this is F#"', kernel='F#')
         assert 'F# version' in notebook.check_output(
             '%sessioninfo', kernel="SoS")
         # notebook.call("cat('this is R')", kernel='F#')
         # assert 'R version' in notebook.check_output(
         #     '%sessioninfo', kernel="SoS")
+
+    #Uncomment to prevent tab from closing; helps in debugging
+    def test_sleep(self):
+        time.sleep(60)
+        return True

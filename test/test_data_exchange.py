@@ -5,7 +5,7 @@
 
 from sos_notebook.test_utils import NotebookTest
 import random
-
+import time
 
 class TestDataExchange(NotebookTest):
 
@@ -32,7 +32,7 @@ class TestDataExchange(NotebookTest):
             let {var_name} = {r_expr}
             ''',
             kernel='F#')
-        return notebook.check_output(f'{var_name}', kernel='SoS')
+        return notebook.check_output(f'print(repr({var_name}))', kernel='SoS')
     #return notebook.check_output(f'print(repr({var_name}))', kernel='SoS')
 
     def test_get_none(self, notebook):
@@ -49,7 +49,7 @@ class TestDataExchange(NotebookTest):
         #assert 'Inf' == self.get_from_SoS(notebook, 'numpy.inf')
 
     def test_put_inf(self, notebook):
-        assert 'inf' == self.put_to_SoS(notebook, 'Infinity')
+        assert 'inf' == self.put_to_SoS(notebook, 'infinity')
 #        assert 'inf' == self.put_to_SoS(notebook, 'Inf')
 
     def test_get_int(self, notebook):
@@ -155,7 +155,7 @@ class TestDataExchange(NotebookTest):
 
     def test_put_mixed_list(self, notebook):
         assert "['1.4', 'TRUE', 'asd']" == self.put_to_SoS(
-            notebook, '[1.4 :> obj; TRUE :> obj; "asd":> obj] |> ResizeArray' )
+            notebook, '[1.4 :> obj; true :> obj; "asd":> obj] |> ResizeArray' )
         # assert "['1.4', 'TRUE', 'asd']" == self.put_to_SoS(
         #     notebook, 'c(1.4, TRUE, "asd")')
 
@@ -268,3 +268,8 @@ class TestDataExchange(NotebookTest):
     #     output = self.get_from_SoS(
     #         notebook, "{'11111': 1, '_1111': 'a', 11112: 2, (1,2): 3}")
     #     assert '$X11111' in output and '$X_1111' in output and '$X11112' in output and '$X_1__2_' in output
+
+    #Uncomment to prevent tab from closing; helps in debugging
+    def test_sleep(self):
+        time.sleep(60)
+        return True

@@ -3,10 +3,13 @@
 # Copyright (c) Bo Peng and the University of Texas MD Anderson Cancer Center
 # Distributed under the terms of the 3-clause BSD License.
 
-import os
-import pandas as pd
+#import os
 import numpy
+import pandas
 import re
+import tempfile
+
+from collections import Sequence
 from sos.utils import short_repr, env
 from IPython.core.error import UsageError
 
@@ -38,9 +41,9 @@ def _Fsharp_repr(obj, processed=None):
         return repr(obj)
     elif isinstance(obj, float):
         if numpy.isnan(obj):
-            return 'NaN'
+            return 'nan'
         elif numpy.isinf(obj):
-            return 'Infinity'
+            return 'infinity'
         else:
             return repr(obj)
     elif isinstance(obj, Sequence):
@@ -224,7 +227,11 @@ class sos_fsharp:
         'variable_pattern': r'^\s*let\s+([_A-Za-z\$@`\?][_A-Za-z0-9\$@`\?]+)\s*(=).*$',
         'assignment_pattern': r'^\s*([_A-Za-z\$@`\?][_A-Za-z0-9\$@`\?]+)\s*(<-).*$',
     }
-    cd_command = "System.Environment.CurrentDirectory <- @\"{dir}\""
+    cd_command = 'System.Environment.CurrentDirectory <- @"{dir}"'
+    # cd_command = f'''\
+    #     System.Environment.CurrentDirectory <- @"{dir}"
+    #     System.Environment.CurrentDirectory
+    #     '''
     __version__ = __version__
 
     def __init__(self, sos_kernel, kernel_name='ifsharp'):
@@ -306,9 +313,11 @@ class sos_fsharp:
 
     def sessioninfo(self):
         response = self.sos_kernel.get_response(
-            'match System.AppDomain.CurrentDomain.GetAssemblies() |> Seq.map( fun a -> a.GetName()) |> Seq.tryFind( fun name -> name.Name = \"FSharp.Core\") with |Some(x) -> x.ToString()| None -> \"No session information is available\"',
+            'match System.AppDomain.CurrentDomain.GetAssemblies() |> Seq.map( fun a -> a.GetName()) |> Seq.tryFind( fun name -> name.Name = "FSharp.Core") with |Some(x) -> x.ToString()| None -> "No session information is available"',
             ('stream',),
-            name=('stdout',))[0]
-        return response[1]['text']
+            name=('stdout',))#[0]
+        #TODO:debug
+        env.log_to_file('DEBUG', f'response is: {response}')
+        return response[0][1]['text']
 
         
