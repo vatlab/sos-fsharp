@@ -138,6 +138,11 @@ Fsharp_init_statements = r'''
 open System.Numerics
 open System.Collections.Generic
 
+let getVars() =
+    System.Reflection.Assembly.GetExecutingAssembly().GetTypes() 
+    |> Seq.collect( fun t -> t.GetProperties(System.Reflection.BindingFlags.Static ||| System.Reflection.BindingFlags.NonPublic ||| System.Reflection.BindingFlags.Public) |> Seq.map(fun p -> p.Name) ) 
+    |> Seq.toArray
+
 let printObject x =
     let t = x.GetType()
     let properties = t.GetProperties()
@@ -203,6 +208,8 @@ let rec pyRepr (obj:obj) =
     | :? (seq<string>[]) as a ->
         a |> pyReprArray pyReprCharacter
 
+    //TODO: NEED SINGLETON AND 1D CASES, SEE https://github.com/vatlab/sos-r/blob/master/src/sos_r/kernel.py
+
     //handles nested dictionaries
     | :? IDictionary<obj,obj> as d ->
         "{" + ( d |> Seq.map(fun (KeyValue(k,v)) -> (k |> pyRepr) + ":" + (v |> pyRepr) )  |> String.concat "," )  + "}"
@@ -220,7 +227,7 @@ and pyReprN (obj:seq<obj>) =
     "[" + ( obj |> Seq.map pyRepr |> String.concat "," ) + "]"
 '''
 
-class sos_fsharp:
+class sos_Fsharp:
     supported_kernels = {'F#': ['ifsharp']}
     background_color = '#5DBCD2'
     options = {
@@ -259,8 +266,7 @@ class sos_fsharp:
 
     def put_vars(self, items, to_kernel=None):
         # first let us get all variables with names starting with sos
-        response = self.sos_kernel.get_response(
-            'System.Reflection.Assembly.GetExecutingAssembly().GetTypes() |> Seq.collect( fun t -> t.GetProperties(System.Reflection.BindingFlags.Static ||| System.Reflection.BindingFlags.NonPublic ||| System.Reflection.BindingFlags.Public) |> Seq.map(fun p -> p.Name) ) |> Seq.toArray', ('stream',), name=('stdout',))[0][1]
+        response = self.sos_kernel.get_response('getVars() |> pyRepr', ('stream',), name=('stdout',))[0][1]
         all_vars = eval(response['text'])
         all_vars = [all_vars] if isinstance(all_vars, str) else all_vars
 

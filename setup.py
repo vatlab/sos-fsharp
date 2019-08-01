@@ -43,6 +43,6 @@ setup(name="sos-fsharp",
       ],
       entry_points='''
 [sos_languages]
-F# = sos_fsharp.kernel:sos_fsharp
+F# = sos_fsharp.kernel:sos_Fsharp
 '''
       )

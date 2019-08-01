@@ -3,7 +3,7 @@
 # sos-fsharp
 SoS extension for F# using [IfSharp kernel](https://github.com/fsprojects/IfSharp). Please refer to the [SoS homepage](http://vatlab.github.io/SOS) and [kernel development for SoS](https://vatlab.github.io/sos-docs/doc/user_guide/language_module.html) for more information.
 
-## Run: Example development workflow
+## Development installation in virtual environment
 
 
 ```
@@ -13,13 +13,17 @@ python3.6 -m venv sosvenv
 source sosvenv/bin/activate
 pip install wheel
 pip install git+https://github.com/vatlab/sos-notebook.git
+python -m sos_notebook.install --sys-prefix
 pip install -e .
 
 ```
 
+It is important to ensure that your `sos` kernelspec is pointing to the correct venv, because that venv is where the kernel will look for `sos-fsharp`.
+You can check the kernelspec configuration with `jupyter kernelspec list --json`. 
+
 You'll also need to install [ifsharp](https://github.com/fsprojects/IfSharp) for the F# kernel.
 
-
+During development, changes to `sos-fsharp` will be reflected in the running kernel after a kernel restart.
 
 If removal of pip editable installation is required, do `rm -r $(find . -name '*.egg-info')` from `sos-fsharp` when venv is enabled.
 

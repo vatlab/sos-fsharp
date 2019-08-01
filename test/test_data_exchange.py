@@ -8,12 +8,17 @@ import random
 import time
 
 class TestDataExchange(NotebookTest):
+    _var_idx = 0
 
     def _var_name(self):
-        if not hasattr(self, '_var_idx'):
-            self._var_idx = 0
-        self._var_idx += 1
-        return f'var{self._var_idx}'
+        TestDataExchange._var_idx += 1
+        return f'var{TestDataExchange._var_idx}'
+        #Note: original code was not incrementing for some reason
+        # if not hasattr(self, '_var_idx'):
+        #     self._var_idx = 0
+        #self._var_idx += 1
+        #return f'var{self._var_idx}'
+
 
     def get_from_SoS(self, notebook, sos_expr):
         var_name = self._var_name()
@@ -217,10 +222,7 @@ class TestDataExchange(NotebookTest):
         #                                                'pd.Series([5 ,6, 7])')
 
     #TODO: the only equivalent construct is a map or dict, but those are already tested
-    def test_put_series(self, notebook):
-        output = self.put_to_SoS(notebook,
-                                 "setNames(c(11, 22, 33), c('a', 'b', 'c'))")
-        assert 'a    11' in output and 'b    22' in output and 'c    33' in output
+    # def test_put_series(self, notebook):
         # output = self.put_to_SoS(notebook,
         #                          "setNames(c(11, 22, 33), c('a', 'b', 'c'))")
         # assert 'a    11' in output and 'b    22' in output and 'c    33' in output
