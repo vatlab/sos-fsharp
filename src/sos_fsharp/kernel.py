@@ -187,6 +187,10 @@ let pyReprCharacter obj =
     "r\"\"\"" +  obj + "\"\"\""
     
 let pyReprArray converter obj =
+    let dataString = String.concat "," (obj |> Array.map converter) 
+    "numpy.array([" + dataString + "])" 
+
+let pyReprSeqArray converter obj =
     //1D without shape
     let dataString = String.concat "," (obj |> Array.toSeq |> Seq.reduce Seq.append |> Seq.map converter) 
     //shape
@@ -197,18 +201,41 @@ let pyReprArray converter obj =
 let rec pyRepr (obj:obj) =
 //https://stackoverflow.com/questions/7901111/f-check-if-a-value-is-an-array-of-strings-an-array-of-arrays-of-string-or-a-s
     match obj with
-    | :? (seq<bool>[]) as a ->
+    //SINGLETON
+    | :? (bool) as a ->
+        a |> pyReprLogical
+    | :? (int) as a ->
+        a |> pyReprInteger
+    | :? (float) as a ->
+        a |> pyReprDouble
+    | :? (Complex) as a ->
+        a |> pyReprComplex
+    | :? (string) as a ->
+        a |> pyReprCharacter
+    //1D ARRAYS
+    | :? (bool[]) as a ->
         a |> pyReprArray pyReprLogical
-    | :? (seq<int>[]) as a ->
+    | :? (int[]) as a ->
         a |> pyReprArray pyReprInteger
-    | :? (seq<float>[]) as a ->
+    | :? (float[]) as a ->
         a |> pyReprArray pyReprDouble
-    | :? (seq<Complex>[]) as a ->
+    | :? (Complex[]) as a ->
         a |> pyReprArray pyReprComplex
-    | :? (seq<string>[]) as a ->
+    | :? (string[]) as a ->
         a |> pyReprArray pyReprCharacter
+    //SEQUENCES OF ARRAYS (MATRIX)
+    | :? (seq<bool>[]) as a ->
+        a |> pyReprSeqArray pyReprLogical
+    | :? (seq<int>[]) as a ->
+        a |> pyReprSeqArray pyReprInteger
+    | :? (seq<float>[]) as a ->
+        a |> pyReprSeqArray pyReprDouble
+    | :? (seq<Complex>[]) as a ->
+        a |> pyReprSeqArray pyReprComplex
+    | :? (seq<string>[]) as a ->
+        a |> pyReprSeqArray pyReprCharacter
 
-    //TODO: NEED SINGLETON AND 1D CASES, SEE https://github.com/vatlab/sos-r/blob/master/src/sos_r/kernel.py
+    //DONE?: NEED SINGLETON AND 1D CASES, SEE https://github.com/vatlab/sos-r/blob/master/src/sos_r/kernel.py
 
     //handles nested dictionaries
     | :? IDictionary<obj,obj> as d ->
