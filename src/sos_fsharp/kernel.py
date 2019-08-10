@@ -308,7 +308,9 @@ class sos_Fsharp:
         if not items:
             return {}
 
-        py_repr = f'cat(..py.repr(list({",".join("{0}={0}".format(x) for x in items)})))'
+        #TODO: as fsharp
+        py_repr = f''
+        #py_repr = f'cat(..py.repr(list({",".join("{0}={0}".format(x) for x in items)})))'
         response = self.sos_kernel.get_response(
             py_repr, ('stream',), name=('stdout',))[0][1]
         expr = response['text']
@@ -334,6 +336,10 @@ class sos_Fsharp:
                 self.sos_kernel.warn(f'Failed to evaluate {expr!r}: {e}')
                 return None
 
+    #TODO see R init
+    #..sos.preview <- function(name) {
+    #tryCatch( str(get(name)), error = function(err) { cat(paste('Unknown variable', name)) })
+    #}
     def preview(self, item):
         # return '', f'Unknown variable {item}'
         try:
@@ -346,11 +352,11 @@ class sos_Fsharp:
 
     def sessioninfo(self):
         response = self.sos_kernel.get_response(
-            'match System.AppDomain.CurrentDomain.GetAssemblies() |> Seq.map( fun a -> a.GetName()) |> Seq.tryFind( fun name -> name.Name = "FSharp.Core") with |Some(x) -> x.ToString()| None -> "No session information is available"',
+            r'match System.AppDomain.CurrentDomain.GetAssemblies() |> Seq.map( fun a -> a.GetName()) |> Seq.tryFind( fun name -> name.Name = "FSharp.Core") with |Some(x) -> x.ToString()| None -> "No session information is available"',
             ('stream',),
-            name=('stdout',))#[0]
+            name=('stdout',))[0]
         #TODO:debug
-        env.log_to_file('DEBUG', f'response is: {response}')
-        return response[0][1]['text']
+        env.log_to_file('ANDREWDEBUG', f'response is: {response}')
+        return response[1]['text']
 
         
